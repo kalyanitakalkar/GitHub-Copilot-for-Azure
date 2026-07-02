@@ -47,8 +47,8 @@ Activate when the user wants to:
 Run these steps **in order** (full KQL, filters, pagination, and output format in
 [references/arg-query.md](references/arg-query.md)):
 
-1. **Scope** — Ask which subscriptions to analyze; capture optional filters (category, subcategories, resource groups, retirement window).
-2. **Query ARG (ARM MCP)** — Call `execute_query` **once** with **all** subscription IDs in `subscriptions`. Follow `$skipToken` pagination; combine pages into one JSON array.
+1. **Scope** — Present the user's available subscriptions as a selectable list and let them choose which to analyze. **The user may select at most 10 subscription IDs at once** — if more are chosen, ask them to narrow the selection to 10 or fewer. Also capture optional filters (category, subcategories, resource groups, retirement window).
+2. **Query ARG (ARM MCP)** — Call `execute_query` **once** with the selected subscription IDs (≤ 10) in `subscriptions`. Follow `$skipToken` pagination; combine pages into one JSON array.
 3. **Enrich (Advisor MCP)** — Pass the **raw** Step 2 JSON to `fetch_prioritized_recommendations` (`argResultsJson`, `topN`, `language`).
 4. **Present** — Render a table ranked by priority (`#`, Recommendation, Priority score/label, Impact, Resources, Benefit); highlight Critical/High and suggest next steps.
 
@@ -57,6 +57,7 @@ Run these steps **in order** (full KQL, filters, pagination, and output format i
 | Condition | Remediation |
 |-----------|-------------|
 | ARG returns no rows | Tell the user there are no active recos for that category; suggest another scope |
+| More than 10 subscriptions selected | Ask the user to reduce the selection to 10 or fewer before querying |
 | Invalid ARG JSON in Advisor MCP | Pass the raw, unmodified `execute_query` output |
 | Not authenticated | Ensure the user is logged in to Azure |
 

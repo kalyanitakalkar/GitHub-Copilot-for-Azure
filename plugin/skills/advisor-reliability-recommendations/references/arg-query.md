@@ -1,9 +1,9 @@
 # ARM MCP — Azure Resource Graph Query
 
-Run **one** `execute_query` call across **all** subscriptions (pass every subscription ID in
-the `subscriptions` array). Never run per-subscription queries. The `summarize` groups by
-`recommendationTypeId` across all subscriptions, returning only the minimum fields needed for
-enrichment.
+Run **one** `execute_query` call across the selected subscriptions (pass every selected
+subscription ID in the `subscriptions` array, **max 10**). Never run per-subscription queries.
+The `summarize` groups by `recommendationTypeId` across all subscriptions, returning only the
+minimum fields needed for enrichment.
 
 ## Base query
 
