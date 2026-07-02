@@ -1,0 +1,84 @@
+# Vally eval config for advisor-reliability-recommendations skill.
+#
+# Coverage: skill-invocation routing for the prioritization trigger phrases.
+# These are routing checks (earlyTerminate after the skill is called) — they do NOT
+# exercise the external azure-arm-mcp / advisor-mcp-dev servers, which are not part of
+# this plugin. Behavior/tool-call assertions can be added once those MCP servers are
+# available in the test environment.
+#
+# Global graders (evaluate#125 workaround): no_runtime_failure is duplicated into
+# every stimulus block below.
+
+name: advisor-reliability-recommendations-integration-eval
+description: |
+  Integration evaluation for the advisor-reliability-recommendations skill.
+  Verifies the skill is invoked for prompts asking to fetch and prioritize active
+  Azure Advisor reliability recommendations using invocation-rate measurement.
+
+tags:
+  type: integration
+  skill: advisor-reliability-recommendations
+
+config:
+  runs: 5
+  timeout: "10m"
+  executor: integration-test-agent-runner
+  model: claude-sonnet-4.6
+
+scoring:
+  threshold: 0.8
+
+stimuli:
+  # ── prioritize-routing (smoke) ──
+  - name: "Prioritize Advisor reliability recommendations"
+    prompt: "Prioritize my Azure Advisor reliability recommendations for my subscriptions."
+    tags:
+      type: integration
+      tier: smoke
+      cost: llm
+      area: routing
+      earlyTerminate: '[{"type":"skill-call","skill":"advisor-reliability-recommendations"},{"type":"tool-call-count","count":3}]'
+    graders:
+      - type: skill-invocation
+        config:
+          required:
+            - advisor-reliability-recommendations
+      - type: output-not-matches
+        config:
+          pattern: "(?i)fatal error|unhandled exception|stack trace"
+
+  # ── which-first-routing (full) ──
+  - name: "Which reliability recommendations first"
+    prompt: "Which Azure Advisor reliability recommendations should I fix first?"
+    tags:
+      type: integration
+      tier: full
+      cost: llm
+      area: routing
+      earlyTerminate: '[{"type":"skill-call","skill":"advisor-reliability-recommendations"},{"type":"tool-call-count","count":3}]'
+    graders:
+      - type: skill-invocation
+        config:
+          required:
+            - advisor-reliability-recommendations
+      - type: output-not-matches
+        config:
+          pattern: "(?i)fatal error|unhandled exception|stack trace"
+
+  # ── high-availability-routing (full) ──
+  - name: "Rank high availability Advisor findings by priority"
+    prompt: "Show my high availability Azure Advisor findings ranked by priority score."
+    tags:
+      type: integration
+      tier: full
+      cost: llm
+      area: routing
+      earlyTerminate: '[{"type":"skill-call","skill":"advisor-reliability-recommendations"},{"type":"tool-call-count","count":3}]'
+    graders:
+      - type: skill-invocation
+        config:
+          required:
+            - advisor-reliability-recommendations
+      - type: output-not-matches
+        config:
+          pattern: "(?i)fatal error|unhandled exception|stack trace"
